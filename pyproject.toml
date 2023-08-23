@@ -5,7 +5,7 @@ description = ""
 authors = ["Guillaume Desforges <guillaume.desforges.pro@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "nix_survey_analysis"}]
+packages = [{include = "nixos"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
