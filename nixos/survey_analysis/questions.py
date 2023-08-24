@@ -63,6 +63,7 @@ def group_choices_by_question_id(
 
 @dataclass
 class ChoicesByQuestionIdByType:
+    ranking: dict[str, list[Choice]]
     categorical: dict[str, list[Choice]]
     multiple_choices: dict[str, list[Choice]]
     other: dict[str, list[Choice]]
@@ -72,24 +73,40 @@ def group_by_question_type(
     choices_by_question_id: dict[str, list[Choice]],
     df: DataFrame,
 ) -> ChoicesByQuestionIdByType:
-    # split into multiple choice and categorical questions
-    multiple_choice_questions = {
+    ranking_questions = {
         question_id: choices
-        for question_id in choices_by_question_id
-        if (
+        for question_id, choices in choices_by_question_id.items()
+        if all(
             (
-                len(choices := choices_by_question_id[question_id]) > 1
-                and "other" not in [q.choice_id for q in choices]
+                choice.choice_text is not None
+                and f"Rank {choice.choice_id}" == choice.choice_text
             )
-            or len(choices) > 2
+            for choice in choices
         )
     }
+
+    multiple_choice_questions = {
+        question_id: choices
+        for question_id, choices in choices_by_question_id.items()
+        if (
+            question_id not in ranking_questions
+            and (
+                (len(choices) > 1 and "other" not in [q.choice_id for q in choices])
+                or len(choices) > 2
+            )
+        )
+    }
+
     categorical_questions = {
         question_id: choices
         for question_id in choices_by_question_id
         if (
-            (len(choices := choices_by_question_id[question_id]) == 1)
-            or (len(choices) == 2 and "other" in [q.choice_id for q in choices])
+            question_id not in ranking_questions
+            and question_id not in multiple_choice_questions
+            and (
+                (len(choices := choices_by_question_id[question_id]) == 1)
+                or (len(choices) == 2 and "other" in [q.choice_id for q in choices])
+            )
         )
         # this condition helps separate categorical from free text questions
         # NOTE in 2023 categorical questions had a max of 9 choices
@@ -100,16 +117,28 @@ def group_by_question_type(
     other_questions = {
         question_id: choices_by_question_id[question_id]
         for question_id in choices_by_question_id
-        if question_id not in multiple_choice_questions
-        and question_id not in categorical_questions
+        if (
+            question_id not in ranking_questions
+            and question_id not in multiple_choice_questions
+            and question_id not in categorical_questions
+        )
     }
 
     # make sure that all questions are accounted for
     assert sum(
-        map(len, [multiple_choice_questions, categorical_questions, other_questions])
+        map(
+            len,
+            [
+                ranking_questions,
+                multiple_choice_questions,
+                categorical_questions,
+                other_questions,
+            ],
+        )
     ) == len(choices_by_question_id)
 
     return ChoicesByQuestionIdByType(
+        ranking=ranking_questions,
         categorical=categorical_questions,
         multiple_choices=multiple_choice_questions,
         other=other_questions,

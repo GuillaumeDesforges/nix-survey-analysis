@@ -68,8 +68,7 @@ def plot_multiple_choices_questions(
                 df=df,
             )
         except NotMultileChoicesQuestion as e:
-            print(question_id, "is not a multiple choices question")
-            print(e)
+            print(f"{question_id} is not a multiple choices question: {e}")
             continue
 
         plot_folder.mkdir(parents=True, exist_ok=True)
@@ -86,6 +85,16 @@ questions_by_id = group_choices_by_question_id(
         columns=df.columns,
     ),
 )
+# remove choices that are excluded in the config
+for question_id, choices in questions_by_id.items():
+    if question_id not in config.questions:
+        continue
+    choices_to_exclude = config.questions[question_id].exclude
+    if choices_to_exclude is None:
+        continue
+    questions_by_id[question_id] = [
+        choice for choice in choices if choice.choice_id not in choices_to_exclude
+    ]
 questions_by_id_by_type = group_by_question_type(
     choices_by_question_id=questions_by_id,
     df=df,
