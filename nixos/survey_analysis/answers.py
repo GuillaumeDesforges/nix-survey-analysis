@@ -53,3 +53,17 @@ def unfold_answers(
                 answers.append(question_with_answer.answer)
 
     return answers
+
+
+def get_categorical_answers(
+    questions: list[Question],
+    df: DataFrame,
+):
+    questions_not_other = [
+        question for question in questions if question.answer_id != "other"
+    ]
+    assert len(questions_not_other) == 1
+    question = questions_not_other[0]
+    return [
+        "Not answered" if answer == "" else answer for answer in df[question.column]
+    ]

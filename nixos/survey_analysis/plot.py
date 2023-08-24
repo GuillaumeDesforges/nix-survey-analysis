@@ -1,5 +1,6 @@
 from polars import DataFrame
-from nixos.survey_analysis.questions import Question, get_categorical_answers
+from nixos.survey_analysis.answers import get_categorical_answers
+from nixos.survey_analysis.questions import Question
 import matplotlib.pyplot as plt
 
 
