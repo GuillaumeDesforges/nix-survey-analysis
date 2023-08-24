@@ -120,14 +120,11 @@ def group_by_question_type(
 
 
 def get_categorical_answers(
-    questions_by_id: dict[str, list[Question]],
-    question_id: str,
+    questions: list[Question],
     df: DataFrame,
 ):
     questions_not_other = [
-        question
-        for question in questions_by_id[question_id]
-        if question.answer_id != "other"
+        question for question in questions if question.answer_id != "other"
     ]
     assert len(questions_not_other) == 1
     question = questions_not_other[0]

@@ -4,12 +4,14 @@ import matplotlib.pyplot as plt
 
 
 def plot_categorical_question(
-    questions_by_id: dict[str, list[Question]],
-    question_id: str,
+    questions: list[Question],
     answer_order: list[str] | None,
     df: DataFrame,
 ):
-    answers = get_categorical_answers(questions_by_id, question_id, df)
+    answers = get_categorical_answers(
+        questions=questions,
+        df=df,
+    )
     unique_answers = list(set(answers))
 
     if answer_order is None:
@@ -38,7 +40,8 @@ def plot_categorical_question(
 
     assert all(answer in unique_answers for answer in answer_order)
 
-    plt.title(questions_by_id[question_id][0].question_text)
+    question_text = questions[0].question_text
+    plt.title(question_text)
     # vertical grid
     plt.grid(axis="x")
     # plot horizontal bar chart

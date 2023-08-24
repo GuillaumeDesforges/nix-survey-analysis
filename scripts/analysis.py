@@ -33,8 +33,7 @@ def plot_categorical_questions(
     for question_id in categorical_questions_by_id:
         plt.subplots(figsize=(10, 5))
         plot_categorical_question(
-            questions_by_id=categorical_questions_by_id,
-            question_id=question_id,
+            questions=categorical_questions_by_id[question_id],
             answer_order=(
                 config.questions[question_id].order
                 if question_id in config.questions
