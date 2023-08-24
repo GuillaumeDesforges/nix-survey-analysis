@@ -65,6 +65,7 @@ def group_choices_by_question_id(
 class ChoicesByQuestionIdByType:
     ranking: dict[str, list[Choice]]
     categorical: dict[str, list[Choice]]
+    multiple_choices_with_comments_questions: dict[str, list[Choice]]
     multiple_choices: dict[str, list[Choice]]
     other: dict[str, list[Choice]]
 
@@ -85,11 +86,30 @@ def group_by_question_type(
         )
     }
 
-    multiple_choice_questions = {
+    multiple_choices_with_comments_questions = {
         question_id: choices
         for question_id, choices in choices_by_question_id.items()
         if (
             question_id not in ranking_questions
+            and (
+                (len(choices) > 1 and "other" not in [q.choice_id for q in choices])
+                or len(choices) > 2
+            )
+            and all(
+                f"{choice.choice_id}comment" in [choice.choice_id for choice in choices]
+                for choice in choices
+                if choice.choice_id is not None
+                and not choice.choice_id.endswith("comment")
+            )
+        )
+    }
+
+    multiple_choices_questions = {
+        question_id: choices
+        for question_id, choices in choices_by_question_id.items()
+        if (
+            question_id not in ranking_questions
+            and question_id not in multiple_choices_with_comments_questions
             and (
                 (len(choices) > 1 and "other" not in [q.choice_id for q in choices])
                 or len(choices) > 2
@@ -102,7 +122,8 @@ def group_by_question_type(
         for question_id in choices_by_question_id
         if (
             question_id not in ranking_questions
-            and question_id not in multiple_choice_questions
+            and question_id not in multiple_choices_with_comments_questions
+            and question_id not in multiple_choices_questions
             and (
                 (len(choices := choices_by_question_id[question_id]) == 1)
                 or (len(choices) == 2 and "other" in [q.choice_id for q in choices])
@@ -119,7 +140,8 @@ def group_by_question_type(
         for question_id in choices_by_question_id
         if (
             question_id not in ranking_questions
-            and question_id not in multiple_choice_questions
+            and question_id not in multiple_choices_with_comments_questions
+            and question_id not in multiple_choices_questions
             and question_id not in categorical_questions
         )
     }
@@ -130,7 +152,8 @@ def group_by_question_type(
             len,
             [
                 ranking_questions,
-                multiple_choice_questions,
+                multiple_choices_with_comments_questions,
+                multiple_choices_questions,
                 categorical_questions,
                 other_questions,
             ],
@@ -140,6 +163,7 @@ def group_by_question_type(
     return ChoicesByQuestionIdByType(
         ranking=ranking_questions,
         categorical=categorical_questions,
-        multiple_choices=multiple_choice_questions,
+        multiple_choices_with_comments_questions=multiple_choices_with_comments_questions,
+        multiple_choices=multiple_choices_questions,
         other=other_questions,
     )
