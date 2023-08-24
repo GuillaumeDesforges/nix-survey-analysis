@@ -13,5 +13,6 @@ Copy CSV files to a new `data` folder.
 Currently needs `data/results-survey2023.csv`.
 
 ```
-poetry run python ./analysis.py
+poetry run python ./scripts/questions.py
+poetry run python ./scripts/analysis.py
 ```

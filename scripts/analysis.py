@@ -1,3 +1,6 @@
+"""
+This script is run the analysis of survey results.
+"""
 from datetime import datetime
 from pathlib import Path
 

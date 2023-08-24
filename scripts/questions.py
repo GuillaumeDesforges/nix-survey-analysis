@@ -1,3 +1,6 @@
+"""
+Print a table of all questions in the survey, grouped by question type.
+"""
 import polars as pl
 
 from nixos.survey_analysis.questions import (
